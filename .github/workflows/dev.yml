@@ -13,4 +13,5 @@ jobs:
     uses: Abdullahi127/Reusable_Workflows/.github/workflows/buildPublish.yml@main
 
   deployment:
+    needs: buildPublish
     uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
