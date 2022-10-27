@@ -1,0 +1,16 @@
+name: CI/CD - Development Branch
+
+on:
+  push:
+    paths:
+      - ".github/workflows/dev.yml"
+      - "src/**"
+      - "build.gradle"
+      - "settings.gradle"
+
+jobs:
+  buildPublish:
+    uses: Abdullahi127/Reusable_Workflows/.github/workflows/buildPublish.yml@main
+
+  deployment:
+    uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
