@@ -1,10 +1,13 @@
-plugins{
+plugins {
     id "java"
 }
 
 group = "com.learning.continues.delivery"
 project.version = "1.0.0"
 
+java{
+    withSourcesJar()
+}
 
 repositories {
     mavenCentral()
