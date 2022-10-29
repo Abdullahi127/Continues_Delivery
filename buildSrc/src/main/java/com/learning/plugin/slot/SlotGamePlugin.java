@@ -4,7 +4,6 @@ import com.learning.plugin.slot.digest.DigestExtension;
 import com.learning.plugin.slot.digest.TaskDigestOnFiles;
 import com.learning.plugin.slot.digest.TaskDigestOnGeneratedFiles;
 import com.learning.plugin.slot.version.TaskSetCurrentVersion;
-import com.learning.plugin.slot.version.TaskUpdateVersion;
 import com.learning.plugin.slot.version.VersionExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -28,9 +27,6 @@ public class SlotGamePlugin implements Plugin<Project> {
 	public static final Class<TaskDigestOnFiles> CLASS_DIGEST_ON_FILES = TaskDigestOnFiles.class;
 
 	// --- Version tasks.
-	public static final String TASK_UPDATE_VERSION = "updateVersion";
-	public static final Class<TaskUpdateVersion> CLASS_UPDATE_VERSION = TaskUpdateVersion.class;
-
 	public static final String TASK_SET_CURRENT_VERSION = "setCurrentVersion";
 	public static final Class<TaskSetCurrentVersion> CLASS_SET_CURRENT_VERSION = TaskSetCurrentVersion.class;
 
@@ -64,7 +60,6 @@ public class SlotGamePlugin implements Plugin<Project> {
 		registerDigestOnFilesTask(project, digestExtension);
 
 		// Version tasks.
-		registerUpdateVersion(project, versionExtension);
 		registerSetCurrentVersion(project, versionExtension);
 
 		// Slot build tasks.
@@ -133,24 +128,6 @@ public class SlotGamePlugin implements Plugin<Project> {
 			   .named(BUILD_TASK)
 			   .get()
 			   .dependsOn(TASK_DIGEST_ON_FILES);
-	}
-
-	private void registerUpdateVersion(Project project, VersionExtension extension) {
-		project.getTasks().register(TASK_UPDATE_VERSION, CLASS_UPDATE_VERSION, task -> {
-
-			// Group, description and dependency order.
-			task.setGroup(GROUP_THUNDERKICK);
-			task.setDescription("Increases current version by one.");
-			task.mustRunAfter(TASK_SET_CURRENT_VERSION);
-
-			// Update the properties.
-			task.setTomlFile(extension.getTomlFile().get());
-			task.setAlias(extension.getAlias().get());
-			task.setProjectVersion(extension.getProjectVersion().get());
-
-			// Update project version on runtime
-			task.doLast(Task-> project.setVersion(task.getProjectVersion()));
-		});
 	}
 
 	private void registerSetCurrentVersion(Project project, VersionExtension extension) {

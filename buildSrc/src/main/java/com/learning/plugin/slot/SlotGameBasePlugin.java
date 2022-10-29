@@ -79,38 +79,17 @@ public class SlotGameBasePlugin implements Plugin<Project> {
 			);
 
 
+			// Get the jar task.
 			TaskProvider<Jar> jarFile = project.getTasks().withType(CLASS_JAR).named(TASK_JAR);
-
 			extension.getJarFile().convention(jarFile);
 
+			// Get the source jar task.
 			TaskProvider<Jar> sourceJarFile = project.getTasks().withType(CLASS_JAR).named(TASK_SOURCE_JAR);
-
 			extension.getSourceJarFile().convention(sourceJarFile);
 
-
+			// Get the source zip task.
 			TaskProvider<Zip> zipTask = project.getTasks().withType(CLASS_ZIP).named(TASK_SOURCE_ZIP);
-
 			extension.getZipFile().convention(zipTask);
-
-			/*
-
-			// Set initial JAR-FILE path.
-			String jarPath = BUILD_LIB_FOLDER + project.getName() + "-" + project.getVersion() + ".jar";
-			File jarFile = project.getLayout().getBuildDirectory().file(jarPath).get().getAsFile();
-			extension.getJarFile().convention(jarFile);
-
-			// Set initial SOURCE-JAR.FILE path.
-
-			String sourceJarPath = BUILD_LIB_FOLDER + project.getName() + "-" + project.getVersion() + "-sources.jar";
-			File sourceJarFile = project.getLayout().getBuildDirectory().file(sourceJarPath).get().getAsFile();
-			extension.getSourceJarFile().convention(sourceJarFile);
-
-			// Set initial ZIP-FILE path.
-			String zipPath = BUILD_DISTRIBUTIONS_FOLDER + project.getName() + "-" + project.getVersion() + ".zip";
-			File zipFile = project.getLayout().getBuildDirectory().file(zipPath).get().getAsFile();
-			extension.getZipFile().convention(zipFile);
-
-			 */
 
 			// Set message to empty string.
 			extension.getAdditionalDigestFiles().getMessage().convention(EMPTY_STRING);
