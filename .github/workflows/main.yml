@@ -1,9 +1,0 @@
-name: CI/CD - main Branch
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  deployment:
-    uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployCertEnvs.yml@main
