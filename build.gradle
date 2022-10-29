@@ -1,9 +1,8 @@
-plugins {
-    id "java"
-}
+import com.learning.plugin.slot.SlotGamePlugin
+
+apply plugin: SlotGamePlugin
 
 group = "com.learning.continues.delivery"
-project.version = "1.0.0"
 
 java{
     withSourcesJar()

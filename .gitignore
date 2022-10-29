@@ -12,3 +12,4 @@ gradle-app.setting
 
 # Additional folder and files
 /.idea/
+/buildSrc/build/

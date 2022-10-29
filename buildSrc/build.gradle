@@ -1,0 +1,35 @@
+plugins{
+    id "java-gradle-plugin"
+    id "maven-publish"
+    id "groovy-gradle-plugin"
+}
+group = "com.learning.plugin"
+version = "1.0.0-SNAPSHOT"
+
+gradlePlugin {
+    plugins {
+        create("slotGamePlugin"){
+            id = "com.learning.plugin.slotgame"
+            implementationClass = "com.learning.plugin.slot.SlotGamePlugin"
+        }
+    }
+}
+
+repositories{
+    mavenCentral()
+}
+
+dependencies{
+
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+
+    testImplementation "org.spockframework:spock-core:2.0-groovy-3.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.8.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:5.8.2"
+    testImplementation "org.junit.vintage:junit-vintage-engine:5.8.2"
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
