@@ -7,8 +7,6 @@ import org.gradle.api.tasks.*;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.bundling.Zip;
 
-import java.io.File;
-
 public abstract class TaskDigestOnGeneratedFiles extends DefaultTask {
 
 	@Optional
