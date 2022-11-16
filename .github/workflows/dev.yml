@@ -10,7 +10,7 @@ on:
 
 jobs:
   buildPublish:
-    uses: Abdullahi127/Reusable_Workflows/.github/workflows/buildPublish.yml@main
+    uses: Abdullahi127/Reusable_Workflows/.github/workflows/gameserver-build.yml@main
 
   deployment:
     needs: buildPublish
