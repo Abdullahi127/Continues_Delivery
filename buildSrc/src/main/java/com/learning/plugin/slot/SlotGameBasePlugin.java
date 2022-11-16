@@ -6,7 +6,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
-import org.gradle.api.tasks.TaskProvider;
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.bundling.Zip;
 
@@ -16,24 +16,24 @@ import java.util.Map;
 
 public class SlotGameBasePlugin implements Plugin<Project> {
 
-	// Plugins.
+	// Base Plugins.
 	public static final Class<JavaPlugin> JAVA_PLUGIN_CLASS = JavaPlugin.class;
+	public static final Class<MavenPublishPlugin> MAVEN_PUBLISH_PLUGIN_CLASS = MavenPublishPlugin.class;
+
+	// Base Extensions
 	public static final Class<JavaPluginExtension> JAVA_PLUGIN_EXTENSION_CLASS = JavaPluginExtension.class;
 
-	// Extensions.
+	// Custom Extensions.
 	public static final String DIGEST_EXTENSION_NAME = "digest";
 	public static final Class<DigestExtension> DIGEST_EXTENSION_CLASS = DigestExtension.class;
 
-	public static final String EXTENSION_VERSION_NAME = "versionControl"; // Note: extension name such as 'version' is not allowed, will lead to bug.
+	public static final String EXTENSION_VERSION_NAME = "versionControl"; // Note: extension name such as 'version' is not allowed, leads to bug. Must be unique.
 	public static final Class<VersionExtension> VERSION_EXTENSION_CLASS =  VersionExtension.class;
 
 	// Default properties.
-	public static final String BUILD_LIB_FOLDER = "libs/";
 	public static final String BUILD_CLASSES_FOLDER = "build/classes/java/main/";
-	public static final String BUILD_DISTRIBUTIONS_FOLDER = "distributions/";
 	public static final String PROJECT_SOURCE_FOLDER = "src/main/java/";
 	public static final Map<String, File> EMPTY_MAPPED_FILES = Collections.emptyMap();
-	public static final String EMPTY_STRING = "";
 	public static final String UNSPECIFIED = "unspecified";
 	public static final String DEFAULT_TOML_FILE_PATH = "./gradle/libs.versions.toml";
 
@@ -48,59 +48,49 @@ public class SlotGameBasePlugin implements Plugin<Project> {
 
 		// Add additional plugins.
 		project.getPluginManager().apply(JAVA_PLUGIN_CLASS); // Get JavaPlugin where the sourceSet, Jars, and Tars tasks can be found.
-		project.getPluginManager().apply("maven-publish");
+		project.getPluginManager().apply(MAVEN_PUBLISH_PLUGIN_CLASS);
 
 		// Enable task from the additional plugins.
 		project.getExtensions().getByType(JAVA_PLUGIN_EXTENSION_CLASS).withSourcesJar(); // Enable sources Jar task.
-
 
 		// Create the extensions. The blocks that will expose the properties to the build script.
 		DigestExtension digestExtension = project.getExtensions().create(DIGEST_EXTENSION_NAME, DIGEST_EXTENSION_CLASS);
 		VersionExtension versionExtension = project.getExtensions().create(EXTENSION_VERSION_NAME, VERSION_EXTENSION_CLASS);
 
-
 		// Out off box settings.
-		configureDigestPlugin(project, digestExtension);
-		configureVersionPlugin(project, versionExtension);
-
+		configureDigestExtension(project, digestExtension);
+		configureVersionExtension(project, versionExtension);
 	}
 
-	private void configureDigestPlugin(Project project, DigestExtension extension) {
+	private void configureDigestExtension(Project project, DigestExtension extension) {
 		project.afterEvaluate(exe -> {
 
-			// Set to default source directory.
+			// Set the source directory.
 			extension.getSourceDirectory().convention(
 					project.getLayout().getProjectDirectory().files(PROJECT_SOURCE_FOLDER)
 			);
 
-			// Set to default build classes directory.
+			// Set the build classes directory.
 			extension.getClassesDirectory().convention(
 					project.getLayout().getBuildDirectory().files(BUILD_CLASSES_FOLDER)
 			);
 
+			// Set the output of the JAR task as input.
+			extension.getJarArchiveFile().convention(project.getTasks().withType(CLASS_JAR).named(TASK_JAR));
 
-			// Get the jar task.
-			TaskProvider<Jar> jarFile = project.getTasks().withType(CLASS_JAR).named(TASK_JAR);
-			extension.getJarFile().convention(jarFile);
+			// Set the output of the SOURCE-JAR task as input.
+			extension.getSourcesJarArchiveFile().convention(project.getTasks().withType(CLASS_JAR).named(TASK_SOURCE_JAR));
 
-			// Get the source jar task.
-			TaskProvider<Jar> sourceJarFile = project.getTasks().withType(CLASS_JAR).named(TASK_SOURCE_JAR);
-			extension.getSourceJarFile().convention(sourceJarFile);
+			// Set the output of the ZIP-FILE task as input.
+			extension.getZipArchiveFile().convention(project.getTasks().withType(CLASS_ZIP).named(TASK_SOURCE_ZIP));
 
-			// Get the source zip task.
-			TaskProvider<Zip> zipTask = project.getTasks().withType(CLASS_ZIP).named(TASK_SOURCE_ZIP);
-			extension.getZipFile().convention(zipTask);
-
-			// Set message to empty string.
-			extension.getAdditionalDigestFiles().getMessage().convention(EMPTY_STRING);
-
-			// Set map to empty map.
+			// Must be overridden by the build script user. Default the map is empty.
 			extension.getAdditionalDigestFiles().getMappedFiles().convention(EMPTY_MAPPED_FILES);
 
 		});
 	}
 
-	private void configureVersionPlugin(Project project, VersionExtension extension) {
+	private void configureVersionExtension(Project project, VersionExtension extension) {
 		project.afterEvaluate(exe -> {
 
 			// Default path to Toml file.
@@ -118,5 +108,4 @@ public class SlotGameBasePlugin implements Plugin<Project> {
 
 		});
 	}
-
 }

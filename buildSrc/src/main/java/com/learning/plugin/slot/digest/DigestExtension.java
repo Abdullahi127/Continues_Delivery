@@ -9,18 +9,16 @@ import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.bundling.Zip;
 
-import java.io.File;
-
 public abstract class DigestExtension {
 	public abstract Property<FileCollection> getSourceDirectory();
 
 	public abstract Property<FileCollection> getClassesDirectory();
 
-	public abstract Property<TaskProvider<Jar>> getJarFile();
+	public abstract Property<TaskProvider<Jar>> getJarArchiveFile();
 
-	public abstract Property<TaskProvider<Jar>> getSourceJarFile();
+	public abstract Property<TaskProvider<Jar>> getSourcesJarArchiveFile();
 
-	public abstract Property<TaskProvider<Zip>> getZipFile();
+	public abstract Property<TaskProvider<Zip>> getZipArchiveFile();
 
 	@Nested
 	public abstract AdditionDigestFiles getAdditionalDigestFiles();

@@ -1,7 +1,5 @@
 package com.learning.plugin.slot.version;
 
-import org.gradle.api.GradleException;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -18,24 +16,30 @@ public class VersionTaskHelper {
 
 	public static final String UNSPECIFIED = "unspecified";
 	public static final String VALID_TOML_FILE_NAME = "libs.versions.toml";
-	public static final String DIGESTS = "\\d+\\.\\d+\\.\\d+";
-	public static final String DEVELOPMENT_VERSION = "DEV";
-	public static final String PLACEHOLDER = "PLACEHOLDER";
+	public static final String DEVELOPMENT_VERSION1 = "DEV";
+	public static final String DEVELOPMENT_VERSION2 = "PLACEHOLDER";
+	public static final String DIGESTS_VERSION1 = "\\d+\\.\\d+\\.\\d+";
+	public static final String DIGESTS_VERSION2 = "\\d+\\.\\d+";
+	public static final String DIGESTS_VERSION3 = "\\d+";
 	public static final String DIGESTS_WITH_SNAPSHOT = "\\d+\\.\\d+\\.\\d+-SNAPSHOT";
 	public static final String DIGESTS_WITH_RELEASE = "\\d+\\.\\d+\\.\\d+-RELEASE";
-	public static final String[] VALID_VERSIONS = new String[5];
-	public static final String[] VALID_VERSIONS_WITHOUT_DEV = new String[3];
+	public static final String[] VALID_VERSIONS = new String[7];
+	public static final String[] VALID_VERSIONS_WITHOUT_DEV = new String[5];
 
 	static {
-		VALID_VERSIONS[0] = DEVELOPMENT_VERSION;
-		VALID_VERSIONS[1] = PLACEHOLDER;
-		VALID_VERSIONS[2] = DIGESTS;
-		VALID_VERSIONS[3] = DIGESTS_WITH_SNAPSHOT;
-		VALID_VERSIONS[4] = DIGESTS_WITH_RELEASE;
+		VALID_VERSIONS[0] = DEVELOPMENT_VERSION1;
+		VALID_VERSIONS[1] = DEVELOPMENT_VERSION2;
+		VALID_VERSIONS[2] = DIGESTS_VERSION1;
+		VALID_VERSIONS[3] = DIGESTS_VERSION2;
+		VALID_VERSIONS[4] = DIGESTS_VERSION3;
+		VALID_VERSIONS[5] = DIGESTS_WITH_SNAPSHOT;
+		VALID_VERSIONS[6] = DIGESTS_WITH_RELEASE;
 
-		VALID_VERSIONS_WITHOUT_DEV[0] = DIGESTS;
-		VALID_VERSIONS_WITHOUT_DEV[1] = DIGESTS_WITH_SNAPSHOT;
-		VALID_VERSIONS_WITHOUT_DEV[2] = DIGESTS_WITH_RELEASE;
+		VALID_VERSIONS_WITHOUT_DEV[0] = DIGESTS_VERSION1;
+		VALID_VERSIONS_WITHOUT_DEV[1] = DIGESTS_VERSION2;
+		VALID_VERSIONS_WITHOUT_DEV[2] = DIGESTS_VERSION3;
+		VALID_VERSIONS_WITHOUT_DEV[3] = DIGESTS_WITH_SNAPSHOT;
+		VALID_VERSIONS_WITHOUT_DEV[4] = DIGESTS_WITH_RELEASE;
 	}
 
 	/**
@@ -63,16 +67,18 @@ public class VersionTaskHelper {
 	 * @param replacementLine	the replacement line that will be used.
 	 * @param regexes			an array list where the regexes that will be used to check each line in the {@code pathToFile}
 	 */
-	public static void replaceLinesMatching(String pathToFile, String replacementLine, List<String> regexes){
+	public static boolean replaceLinesMatching(String pathToFile, String replacementLine, List<String> regexes){
 		Path path = Paths.get(pathToFile);
+		List<String> newLines;
 		try {
 			Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8);
-			List<String> replacedLines = lines.map(line -> replaceLine(regexes, line, replacementLine)).collect(Collectors.toList());
-			Files.write(path, replacedLines, StandardCharsets.UTF_8);
+			newLines = lines.map(line -> replaceLine(regexes, line, replacementLine)).collect(Collectors.toList());
+			Files.write(path, newLines, StandardCharsets.UTF_8);
 			lines.close();
 		}catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+		return !newLines.contains(replacementLine);
 	}
 
 	/**
@@ -94,26 +100,26 @@ public class VersionTaskHelper {
 	}
 
 	/**
-	 * Throw Gradle exception if any of the given {@code isValidFile}, {@code isValidAlias} and {@code isValidVersion} are true.
+	 * Throw runtime exception if any of the given {@code isValidFile}, {@code isValidAlias} and {@code isValidVersion} are true.
 	 *
 	 * @param isInvalidFile		True - The given file is not a correct toml-file.
-	 * @param file				the file that must be a toml file.
+	 * @param fileName			the invalid file name.
 	 * @param isInvalidAlias	True - The given alias could not be found.
 	 * @param alias				the alias that must exist in the given {@code file}.
 	 * @param isInvalidVersion 	True - The given version is not a valid version.
 	 * @param version			the version that must be correct.
 	 */
-	public static void isInvalidTomlProperties(boolean isInvalidFile, File file, boolean isInvalidAlias, String alias, boolean isInvalidVersion, String version, String[] validVersions) {
+	public static void isInvalidTomlProperties(boolean isInvalidFile, String fileName, boolean isInvalidAlias, String alias, boolean isInvalidVersion, String version, String[] validVersions) {
 		if (isInvalidFile) {
-			throw new GradleException("Invalid file [" + file.getAbsolutePath() + "]. The file must be ["+ VALID_TOML_FILE_NAME+"].");
+			throw new RuntimeException("Invalid file name [" + fileName + "].The file name must be ["+ VALID_TOML_FILE_NAME+"].");
 		}
 
 		if (isInvalidAlias) {
-			throw new GradleException("Invalid alias [" + alias + "]. The alias could not be found in the toml file.");
+			throw new RuntimeException("Invalid alias [" + alias + "].The alias could not be found in the toml file.");
 		}
 
 		if (isInvalidVersion) {
-			throw new GradleException("Invalid version [" + version + "]. The version must be one of this: " + Arrays.toString(validVersions) + ".");
+			throw new RuntimeException("Invalid version [" + version + "].The version must be one of this: " + Arrays.toString(validVersions) + ".");
 		}
 	}
 
@@ -183,12 +189,37 @@ public class VersionTaskHelper {
 	}
 
 	/**
-	 * Check if the given string is specified.
+	 * Check if the given string is unspecified.
 	 *
-	 * @param str	the string that will be checked.
-	 * @return True - the string is not equal to the word 'unspecified'.
+	 * @param str	  the string that will be checked.
+	 * @return True - the string is equal to the word 'unspecified'.
 	 */
-	public static boolean isSpecified(String str){
-		return !str.equalsIgnoreCase(UNSPECIFIED);
+	public static boolean isUnspecified(String str){
+		return str.equalsIgnoreCase(UNSPECIFIED);
+	}
+
+	/**
+	 * Throw runtime exception if the given {@code str} is unspecified.
+	 *
+	 * @param str				the string that will be checked.
+	 * @param exceptionMessage	the execution message that will be used.
+	 */
+	public static void isUnspecified(String str, String exceptionMessage){
+		if(isUnspecified(str)){
+			throw new RuntimeException(exceptionMessage);
+		}
+	}
+
+
+	/**
+	 * Throw runtime exception if the given {@code alias} version was not updated.
+	 *
+	 * @param failed	True - The version was not updated.
+	 * @param alias		the name of the version.
+	 */
+	public static void failedVersionReplacement(boolean failed, String alias){
+		if(failed){
+			throw new RuntimeException("Failed to update the toml file. The format must be "+alias+" = \"Version\"");
+		}
 	}
 }

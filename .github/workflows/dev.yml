@@ -9,9 +9,9 @@ on:
       - "settings.gradle"
 
 jobs:
-  buildPublish:
+  build:
     uses: Abdullahi127/Reusable_Workflows/.github/workflows/gameserver-build.yml@main
 
   deployment:
     needs: buildPublish
-    uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
+    uses: Abdullahi127/Reusable_Workflows/.github/workflows/gameserver-deploy.yml@main

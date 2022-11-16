@@ -18,27 +18,28 @@ public abstract class TaskDigestOnGeneratedFiles extends DefaultTask {
 	public abstract Property<FileCollection> getClassesDirectory();
 
 	@Optional
-	@Input
-	public abstract Property<TaskProvider<Jar>> getJarFile();
+	@InputFiles
+	public abstract Property<TaskProvider<Jar>> getJarTask();
 
 	@Optional
-	@Input
-	public abstract Property<TaskProvider<Jar>> getSourceJarFile();
+	@InputFiles
+	public abstract Property<TaskProvider<Jar>> getSourceJarTask();
 
 	@Optional
-	@Input
-	public abstract Property<TaskProvider<Zip>> getZipFile();
+	@InputFiles
+	public abstract Property<TaskProvider<Zip>> getZipTask();
 
 	@TaskAction
 	public void execute(){
 
-		DigestTaskHelper.printFileCollection(getSourceDirectory(), "\nCompile files:");
-		DigestTaskHelper.digestFileCollection(getSourceDirectory(), "\nJava compile input digests:");
-		DigestTaskHelper.digestFileCollection(getClassesDirectory(), "\nJava compile output digests:");
+		DigestTaskHelper.printFileCollection(getSourceDirectory().get(), "\nCompile files:");
+		DigestTaskHelper.printFileCollection(getSourceDirectory().get(), "\nJava compile input digests:");
+		DigestTaskHelper.printFileCollection(getClassesDirectory().get(), "\nJava compile output digests:");
 
-		DigestTaskHelper.digestOnFile(getJarFile().get().get().getArchiveFile().get().getAsFile(), "\nJar output digest:");
-		DigestTaskHelper.digestOnFile(getSourceJarFile().get().get().getArchiveFile().get().getAsFile(), "\nSource jar output digest:");
-		DigestTaskHelper.digestOnFile(getZipFile().get().get().getArchiveFile().get().getAsFile(), "\nZip output digest:");
+		DigestTaskHelper.digestOnFile(getJarTask().get().get().getArchiveFile().get().getAsFile(), "\nJar output digest:");
+		DigestTaskHelper.digestOnFile(getSourceJarTask().get().get().getArchiveFile().get().getAsFile(), "\nSource jar output digest:");
+		DigestTaskHelper.digestOnFile(getZipTask().get().get().getArchiveFile().get().getAsFile(), "\nZip output digest:");
 
 	}
+
 }

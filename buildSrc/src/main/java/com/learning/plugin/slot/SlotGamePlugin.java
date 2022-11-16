@@ -3,21 +3,18 @@ package com.learning.plugin.slot;
 import com.learning.plugin.slot.digest.DigestExtension;
 import com.learning.plugin.slot.digest.TaskDigestOnFiles;
 import com.learning.plugin.slot.digest.TaskDigestOnGeneratedFiles;
-import com.learning.plugin.slot.version.TaskSetCurrentVersion;
+import com.learning.plugin.slot.version.TaskSetProjectVersion;
+import com.learning.plugin.slot.version.TaskUpdateProjectVersion;
 import com.learning.plugin.slot.version.VersionExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.bundling.Zip;
 
 public class SlotGamePlugin implements Plugin<Project> {
 
 	// --- Digest tasks.
 	public static final Class<Zip> CLASS_ZIP = Zip.class;
-	public static final Class<Jar> CLASS_JAR = Jar.class;
-	public static final String TASK_JAR = "jar";
-	public static final String TASK_SOURCE_JAR = "sourcesJar";
 	public static final String TASK_SOURCE_ZIP = "sourceZip";
 
 	public static final String TASK_DIGEST_ON_GENERATED_FILES = "digestOnGeneratedFiles";
@@ -27,20 +24,22 @@ public class SlotGamePlugin implements Plugin<Project> {
 	public static final Class<TaskDigestOnFiles> CLASS_DIGEST_ON_FILES = TaskDigestOnFiles.class;
 
 	// --- Version tasks.
-	public static final String TASK_SET_CURRENT_VERSION = "setCurrentVersion";
-	public static final Class<TaskSetCurrentVersion> CLASS_SET_CURRENT_VERSION = TaskSetCurrentVersion.class;
+	public static final String TASK_UPDATE_VERSION = "updateProjectVersion";
+	public static final Class<TaskUpdateProjectVersion> CLASS_UPDATE_VERSION = TaskUpdateProjectVersion.class;
 
-	// --- Slot tasks.
-	public static final String TASK_SLOT_BUILD = "slotBuild";
-	public static final String TASK_NEXT_VERSION = "nextVersion";
-	public static final String TASK_TAG_N_PUSH = "tagAndPush";
+	public static final String TASK_SET_PROJECT_VERSION = "setProjectVersion";
+	public static final Class<TaskSetProjectVersion> CLASS_SET_CURRENT_VERSION = TaskSetProjectVersion.class;
+
+	// --- Slot build task.
+	public static final String TASK_BUILD_N_PUBLISH = "buildNPublish";
 
 	// Common task variables.
 	public static final String GROUP_THUNDERKICK = "thunderkick";
-	public static final String CLEAN_TASK = "clean";
 	public static final String BUILD_TASK = "build";
 	public static final String ASSEMBLE_TASK = "assemble";
+	public static final String CLEAN_TASK = "clean";
 	public static final String PUBLISH_TASK = "publish";
+
 
 	@Override
 	public void apply(Project project) {
@@ -60,10 +59,11 @@ public class SlotGamePlugin implements Plugin<Project> {
 		registerDigestOnFilesTask(project, digestExtension);
 
 		// Version tasks.
-		registerSetCurrentVersion(project, versionExtension);
+		registerUpdateVersion(project, versionExtension);
+		registerSetProjectVersion(project, versionExtension);
 
-		// Slot build tasks.
-		registerSlotBuild(project); // Must be the last task. Includes tasks: NextVersion, tagAndPush.
+		// Clean Build Publish task.
+		registerBuildPublish(project);
 	}
 
 	private void registerSourceZip(Project project) {
@@ -91,14 +91,14 @@ public class SlotGamePlugin implements Plugin<Project> {
 
 		project.getTasks().register(TASK_DIGEST_ON_GENERATED_FILES, CLASS_DIGEST_ON_GENERATED_FILES, task -> {
 			task.setGroup(GROUP_THUNDERKICK);
-			task.setDescription("Digest on source files (in and out), the jars (with and without source), and the source zip file.");
+			task.setDescription("Digest on source files (in and out), the jars (with and without sources), and the source zip file.");
 			task.mustRunAfter(ASSEMBLE_TASK, TASK_SOURCE_ZIP);
 
 			task.getSourceDirectory().set(extension.getSourceDirectory());
 			task.getClassesDirectory().set(extension.getClassesDirectory().get());
-			task.getJarFile().set(extension.getJarFile().get());
-			task.getSourceJarFile().set(extension.getSourceJarFile().get());
-			task.getZipFile().set(extension.getZipFile().get());
+			task.getJarTask().set(extension.getJarArchiveFile().get());
+			task.getSourceJarTask().set(extension.getSourcesJarArchiveFile().get());
+			task.getZipTask().set(extension.getZipArchiveFile().get());
 
 		});
 
@@ -119,7 +119,6 @@ public class SlotGamePlugin implements Plugin<Project> {
 
 			// Configure the task.
 			task.getMappedFiles().set(extension.getAdditionalDigestFiles().getMappedFiles());
-			task.getMessage().set(extension.getAdditionalDigestFiles().getMessage());
 
 		});
 
@@ -130,39 +129,66 @@ public class SlotGamePlugin implements Plugin<Project> {
 			   .dependsOn(TASK_DIGEST_ON_FILES);
 	}
 
-	private void registerSetCurrentVersion(Project project, VersionExtension extension) {
-		project.getTasks().register(TASK_SET_CURRENT_VERSION, CLASS_SET_CURRENT_VERSION, task -> {
+	private void registerUpdateVersion(Project project, VersionExtension extension) {
+		project.getTasks().register(TASK_UPDATE_VERSION, CLASS_UPDATE_VERSION, task -> {
 
 			// Group, description and dependency order.
 			task.setGroup(GROUP_THUNDERKICK);
-			task.setDescription("Sets the current version by reading the input string.");
+			task.setDescription("Increases the project version by one in toml file.");
+			task.mustRunAfter(TASK_SET_PROJECT_VERSION);
+
+			// Update the properties.
+			task.setAlias(extension.getAlias().get());
+			task.setProjectVersion(extension.getProjectVersion().get());
+			task.setTomlFile(extension.getTomlFile().get());
+
+			task.doLast(exe-> {
+
+				// Update the project version on runtime.
+				project.setVersion(task.getProjectVersion());
+
+			});
+
+		});
+	}
+
+	private void registerSetProjectVersion(Project project, VersionExtension extension) {
+		project.getTasks().register(TASK_SET_PROJECT_VERSION, CLASS_SET_CURRENT_VERSION, task -> {
+
+			// Group, description and dependency order.
+			task.setGroup(GROUP_THUNDERKICK);
+			task.setDescription("Set the project version in toml file.");
 
 			// Update the properties.
 			task.setTomlFile(extension.getTomlFile().get());
 			task.setAlias(extension.getAlias().get());
 			task.setProjectVersion(extension.getProjectVersion().get());
 
-			// Update project version on runtime
-			task.doLast(Task-> project.setVersion(task.getProjectVersion()));
+			task.doLast(exe-> {
+
+				// Update the project version on runtime.
+				project.setVersion(task.getProjectVersion());
+
+			});
+
 		});
 
 	}
 
-	private void registerSlotBuild(Project project) {
-
-		// Slot build task triggers other tasks.
-		project.getTasks().register(TASK_SLOT_BUILD, task -> {
+	private void registerBuildPublish(Project project){
+		project.getTasks().register(TASK_BUILD_N_PUBLISH, task -> {
 			task.setGroup(GROUP_THUNDERKICK);
-			task.setDescription("build and publish jars");
+			task.setDescription("Builds and publish the project.");
 			task.dependsOn(
 					CLEAN_TASK,
 					BUILD_TASK,
-					PUBLISH_TASK // Cannot publish until JFrog artifactory is configured.
+					PUBLISH_TASK
 			);
 		});
 
-		// Execution order = TASK_NEXT_VERSION, CLEAN_TASK, BUILD_TASK, PUBLISH_TASK, TASK_TAG_N_PUSH.
+		// Execution order = CLEAN_TASK, BUILD_TASK, PUBLISH_TASK
 		project.getTasks().named(BUILD_TASK, task -> task.mustRunAfter(CLEAN_TASK));
-
+		project.getTasks().named(PUBLISH_TASK, task -> task.mustRunAfter(BUILD_TASK));
 	}
+
 }

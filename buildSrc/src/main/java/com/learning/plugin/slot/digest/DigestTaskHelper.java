@@ -4,15 +4,13 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.provider.Property;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 import java.util.List;
-import java.util.Objects;
 
 public class DigestTaskHelper {
 
@@ -35,24 +33,37 @@ public class DigestTaskHelper {
 		}
 	}
 
-	public static void recursiveFindFiles(List<File> files, File nextFile, int maxDepthCount, int count){
+	public static void recursiveFindFiles(List<File> files, File nextFile, int count, int maxDepthCount){
 		if(count >= maxDepthCount) return;
 		if (nextFile.isFile()) {
 			files.add(nextFile);
 		} else {
-			for (File file : Objects.requireNonNull(nextFile.listFiles())) {
-				recursiveFindFiles(files, file, maxDepthCount, ++count);
+			File[] nextFiles = nextFile.listFiles();
+			if (nextFiles == null) {
+				throw new RuntimeException("The list of files must not be null. Path to the directory: " + nextFile.getAbsolutePath());
+			} else {
+				for (File file : nextFiles) {
+					recursiveFindFiles(files, file, ++count, maxDepthCount);
+				}
 			}
 		}
 	}
 
-	public static void printFileCollection(Property<FileCollection> fileCollection, String message){
-		if(fileCollection.isPresent()){
-			FileTree fileTree = fileCollection.get().getAsFileTree();
+	public static void printFileCollection(FileCollection fileCollection, String message){
+		if(!fileCollection.isEmpty()){
+			FileTree fileTree = fileCollection.getAsFileTree();
 			if(!fileTree.isEmpty()){
 				printFiles(fileTree, message);
 			}
 		}
+	}
+
+	public static void printFileCollection(Property<FileCollection> fileCollection, String message, String property){
+		FileTree fileTree = fileCollection.get().getAsFileTree();
+		if(fileTree.isEmpty()){
+			throw new RuntimeException("The file collection must not be empty. Property: "+property);
+		}
+		printDigest(fileTree, message);
 	}
 
 	public static void printFiles(FileTree fileTree, String message){
@@ -61,7 +72,6 @@ public class DigestTaskHelper {
 			System.out.println(file.getAbsolutePath());
 		}
 	}
-
 
 	public static void digestFileCollection(Property<FileCollection> fileCollection, String message) {
 		if(fileCollection.isPresent()){
@@ -72,10 +82,37 @@ public class DigestTaskHelper {
 		}
 	}
 
-	public static void digestOnFile(File file, String message) {
-		if (file.exists() && file.isFile()) {
-			printDigest(file, message);
+	public static void digestOnFileCollections(Property<FileCollection> fileCollection, String message, String property){
+		FileTree fileTree = fileCollection.get().getAsFileTree();
+		if(fileTree.isEmpty()){
+			throw new RuntimeException("The file collection must not be empty. Property: "+property);
 		}
+		printDigest(fileTree, message);
+	}
+
+	public static void digestFileCollection(FileCollection fileCollection, String message) {
+		if(!fileCollection.isEmpty()){
+			FileTree fileTree = fileCollection.getAsFileTree();
+			if(!fileTree.isEmpty()){
+				printDigest(fileTree, message);
+			}
+		}
+	}
+
+	public static void digestOnFile(Property<File> fileProperty, String message)  {
+		if(fileProperty.isPresent()){
+			File file = fileProperty.get().getAbsoluteFile();
+			if (file.exists() && file.isFile()) {
+				printDigest(file, message);
+			}
+		}
+	}
+
+	public static void digestOnFile(File file, String message){
+		if(!file.exists()) throw new RuntimeException("The abstract pathname to the file must exist.");
+		if(!file.isFile()) throw new RuntimeException("The abstract pathname to the file must not be a directory. Path: "+file.getAbsolutePath());
+
+		printDigest(file, message);
 	}
 
 	public static void printDigest(FileTree fileTree, String message) {
