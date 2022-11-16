@@ -13,5 +13,5 @@ jobs:
     uses: Abdullahi127/Reusable_Workflows/.github/workflows/gameserver-build.yml@main
 
   deployment:
-    needs: buildPublish
+    needs: build
     uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
