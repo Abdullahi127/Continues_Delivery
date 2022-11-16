@@ -1,7 +1,2 @@
-/*pluginManagement{
-    repositories {
-        gradlePluginPortal()
-        mavenCentral()
-    }
-}*/
 rootProject.name="App"
+include("core", "adp", "dp", "oc", "sim")
