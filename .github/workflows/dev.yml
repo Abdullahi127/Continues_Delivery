@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - ".github/workflows/dev.yml"
-      - "src/**"
-      - "build.gradle"
-      - "settings.gradle"
+      - "core/**/*"
+      - "adp/**/*"
+      - "dp/**/*"
+      - "oc/**/*"
+      - "sim/**/*"
 
 jobs:
   build:
@@ -15,3 +17,4 @@ jobs:
   deployment:
     needs: build
     uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
+# asfasdf
