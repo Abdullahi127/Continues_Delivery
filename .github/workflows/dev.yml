@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    uses: Abdullahi127/Reusable_Workflows/.github/workflows/gameserver-build.yml@main
+    uses: Abdullahi127/Reusable_Workflows/.github/workflows/build.yml@main
 
   deployment:
     needs: build
