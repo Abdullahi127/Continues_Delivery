@@ -12,7 +12,50 @@ on:
 
 jobs:
   build:
-    uses: Abdullahi127/Reusable_Workflows/.github/workflows/build.yml@main
+    runs-on: ubuntu-latest
+    steps:
+      - name: build core
+        run: |
+          chmod +x ./gradlew
+          ./gradlew core:setProjectVersion --projectVersion=1.0.0 --alias=core core:build
+
+      - name: upload adp
+        uses: actions/upload-artifact@v3
+        with:
+          name: deploy
+          path: ./core/build/libs
+          retention-days: 1
+
   deployment:
-    needs: build
-    uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        id: deploy
+        with:
+          name: deploy
+          path: path/to/artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: path/to/artifacts
+
+      - name: "Echo download path"
+        run: |
+          echo "${{ steps.download.outputs.deploy-path }}"
+          for FILE in ${{ steps.download.outputs.deploy-path }}/*.jar; do
+              echo "$FILE";
+          done;
+
+      - name: "Echo download path"
+        run: |
+          echo "${{ steps.download.outputs.deploy }}"
+          for FILE in ${{ steps.download.outputs.deploy }}/*.jar; do
+              echo "$FILE";
+          done;
+
+# jobs:
+#   build:
+#     uses: Abdullahi127/Reusable_Workflows/.github/workflows/build.yml@main
+#   deployment:
+#     needs: build
+#     uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
