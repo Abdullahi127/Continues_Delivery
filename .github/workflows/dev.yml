@@ -13,7 +13,6 @@ on:
 jobs:
   build:
     uses: Abdullahi127/Reusable_Workflows/.github/workflows/build.yml@main
-#   deployment:
-#     needs: build
-#     uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
-# # asfasdf
+  deployment:
+    needs: build
+    uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
