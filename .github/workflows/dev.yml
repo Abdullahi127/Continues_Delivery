@@ -58,7 +58,7 @@ jobs:
           echo "${{ steps.download.outputs.download-path }}"
           for FILE in ${{ steps.download.outputs.download-path }}/*.jar; do
               echo "$FILE";
-              curl -F files=@$FILE "http://192.168.0.16:8080/componentManagement/api/components/"
+              curl -F files=@$FILE "http://192.168.0.120:8080/componentManagement/api/components/"
           done;
 
 # link: https://mkyong.com/spring/curl-post-request-examples/
