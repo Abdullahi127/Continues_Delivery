@@ -58,13 +58,7 @@ jobs:
           echo "${{ steps.download.outputs.download-path }}"
           for FILE in ${{ steps.download.outputs.download-path }}/*.jar; do
               echo "$FILE";
-          done;
-
-      - name: "Echo download path"
-        run: |
-          echo "${{ steps.download.outputs.deploy }}"
-          for FILE in ${{ steps.download.outputs.deploy }}/*.jar; do
-              echo "$FILE";
+              curl "http://localhost:8080/componentManagement/api/components" -F file1=@$FILE
           done;
 
 # jobs:
