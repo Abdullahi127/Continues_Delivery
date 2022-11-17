@@ -58,7 +58,7 @@ jobs:
           echo "${{ steps.download.outputs.download-path }}"
           for FILE in ${{ steps.download.outputs.download-path }}/*.jar; do
               echo "$FILE";
-              curl "http://localhost:8080/componentManagement/api/components" -F file1=@$FILE
+              curl -F files=@$FILE "http://localhost:8080/componentManagement/api/components/"
           done;
 
 # jobs:
