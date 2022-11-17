@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v3
-        id: deploy
+        id: download
         with:
           name: deploy
           path: path/to/artifacts
@@ -55,8 +55,8 @@ jobs:
 
       - name: "Echo download path"
         run: |
-          echo "${{ steps.download.outputs.deploy-path }}"
-          for FILE in ${{ steps.download.outputs.deploy-path }}/*.jar; do
+          echo "${{ steps.download.outputs.download-path }}"
+          for FILE in ${{ steps.download.outputs.download-path }}/*.jar; do
               echo "$FILE";
           done;
 
