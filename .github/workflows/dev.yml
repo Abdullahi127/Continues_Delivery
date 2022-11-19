@@ -12,7 +12,8 @@ on:
 
 jobs:
   build:
-    uses: Abdullahi127/Reusable_Workflows/.github/workflows/testReusable.yml@main
+    uses: Abdullahi127/Reusable_Workflows/.github/workflows/build.yml@main
+    #uses: Abdullahi127/Reusable_Workflows/.github/workflows/testReusable.yml@main
     with:
       core-gradle-name: core
       core-directory-name: core
