@@ -16,16 +16,12 @@ jobs:
     with:
       core-gradle-name: core
       core-directory-name: core
-
       adp-gradle-name: adp
       adp-directory-name: adp
-
       dp-gradle-name: dp
       dp-directory-name: dp
-
       oc-gradle-name: oc
       oc-directory-name: oc
-
       sim-gradle-name: sim
       sim-directory-name: sim
 #asdfasdfds
