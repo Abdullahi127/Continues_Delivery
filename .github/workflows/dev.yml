@@ -24,8 +24,6 @@ jobs:
       oc-directory-name: oc
       sim-gradle-name: sim
       sim-directory-name: sim
-#asdfasdfds
-
 # jobs:
 #   build:
 #     runs-on: ubuntu-latest
