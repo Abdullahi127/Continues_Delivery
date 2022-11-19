@@ -13,7 +13,6 @@ on:
 jobs:
   build:
     uses: Abdullahi127/Reusable_Workflows/.github/workflows/build.yml@main
-    #uses: Abdullahi127/Reusable_Workflows/.github/workflows/testReusable.yml@main
     with:
       core-gradle-name: core
       core-directory-name: core
@@ -25,6 +24,10 @@ jobs:
       oc-directory-name: oc
       sim-gradle-name: sim
       sim-directory-name: sim
+
+  deployment:
+    needs: build
+    uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
 # jobs:
 #   build:
 #     runs-on: ubuntu-latest
@@ -81,10 +84,3 @@ jobs:
 
 # link: https://mkyong.com/spring/curl-post-request-examples/
 # curl -F files=@$FILE "http://localhost:8080/componentManagement/api/components/"
-
-# jobs:
-#   build:
-#     uses: Abdullahi127/Reusable_Workflows/.github/workflows/build.yml@main
-#   deployment:
-#     needs: build
-#     uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
