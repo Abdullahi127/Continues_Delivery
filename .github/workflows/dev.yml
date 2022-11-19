@@ -13,6 +13,12 @@ on:
 jobs:
   build:
     uses: Abdullahi127/Reusable_Workflows/.github/workflows/testReusable.yml@main
+    with:
+      core: core
+      adp: adp
+      dp: dp
+      oc: oc
+      sim: sim
 
   # asdfasdfsd
 # jobs:
