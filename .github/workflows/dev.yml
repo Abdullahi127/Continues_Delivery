@@ -12,56 +12,65 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout dev repo
-        uses: actions/checkout@v3
-        with:
-          ref: dev
-          fetch-depth: 0
+    uses: Abdullahi127/Reusable_Workflows/.github/workflows/testReusable.yml@main
 
-      - name: Setup java
-        uses: actions/setup-java@v3
-        with:
-          distribution: "temurin"
-          java-version: "17"
-          cache: "gradle"
+  # asdfasdfsd
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: checkout dev repo
+#         uses: actions/checkout@v3
+#         with:
+#           ref: dev
+#           fetch-depth: 0
 
-      - name: build core
-        run: |
-          chmod +x ./gradlew
-          ./gradlew core:setProjectVersion --projectVersion=1.0.0 --alias=core core:build
+#       - name: Setup java
+#         uses: actions/setup-java@v3
+#         with:
+#           distribution: "temurin"
+#           java-version: "17"
+#           cache: "gradle"
 
-      - name: upload adp
-        uses: actions/upload-artifact@v3
-        with:
-          name: deploy
-          path: ./core/build/libs
-          retention-days: 1
+#       - name: build core
+#         run: |
+#           chmod +x ./gradlew
+#           ./gradlew core:setProjectVersion --projectVersion=1.0.0 --alias=core core:build
 
-  deployment:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v3
-        id: download
-        with:
-          name: deploy
-          path: path/to/artifacts
+#       - name: upload adp
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: deploy
+#           path: ./core/build/libs
+#           retention-days: 1
 
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: path/to/artifacts
+#   deployment:
+#     needs: build
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/download-artifact@v3
+#         id: download
+#         with:
+#           name: deploy
+#           path: path/to/artifacts
 
-      - name: "Echo download path"
-        run: |
-          echo "${{ steps.download.outputs.download-path }}"
-          for FILE in ${{ steps.download.outputs.download-path }}/*.jar; do
-              echo "$FILE";
-              # curl -F files=@$FILE "http://localhost:8080/componentManagement/api/components/"
-          done;
+#       - name: Display structure of downloaded files
+#         run: ls -R
+#         working-directory: path/to/artifacts
+
+#       - name: "Echo download path"
+#         run: |
+#           echo "${{ steps.download.outputs.download-path }}"
+#           regex="[0-9]\.[0-9]\.[0-9]\.jar"
+#           for FILE in ${{ steps.download.outputs.download-path }}/*.jar; do
+#               if [[ $FILE =~ $regex ]];
+#                 then
+#                 echo "$FILE";
+#               fi
+#           done;
 
 # link: https://mkyong.com/spring/curl-post-request-examples/
+# curl -F files=@$FILE "http://localhost:8080/componentManagement/api/components/"
 
 # jobs:
 #   build:
