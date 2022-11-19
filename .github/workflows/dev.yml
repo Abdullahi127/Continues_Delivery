@@ -19,8 +19,6 @@ jobs:
       dp: dp
       oc: oc
       sim: sim
-
-  # asdfasdfsd
 # jobs:
 #   build:
 #     runs-on: ubuntu-latest
