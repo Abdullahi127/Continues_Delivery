@@ -24,6 +24,8 @@ jobs:
       oc-directory-name: oc
       sim-gradle-name: sim
       sim-directory-name: sim
+      main-branch-name: dev
+      meta-data-branch-name: version
 
   # deployment:
   #   needs: build
