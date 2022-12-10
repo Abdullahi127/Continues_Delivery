@@ -1,0 +1,17 @@
+VersionCatalog versionCatalog = project.extensions.getByType(VersionCatalogsExtension).named("libs")
+for(Project project : project.subprojects){
+    
+    if(project.getName() == "core"){
+        project.version = versionCatalog.findVersion("core").get().toString()
+    } else if(project.getName() == "adp"){
+        project.version = versionCatalog.findVersion("adp").get().toString()
+    } else if(project.getName() == "dp"){
+        project.version = versionCatalog.findVersion("dp").get().toString()
+    } else if(project.getName() == "oc"){
+        project.version = versionCatalog.findVersion("oc").get().toString()
+    } else if(project.getName() == "sim"){
+        project.version = versionCatalog.findVersion("sim").get().toString()
+    }else {
+        throw new GradleException("Failed to set the version of the project: " + project.name)
+    }
+}
