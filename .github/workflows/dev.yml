@@ -25,9 +25,9 @@ jobs:
       sim-gradle-name: sim
       sim-directory-name: sim
 
-  deployment:
-    needs: build
-    uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
+  # deployment:
+  #   needs: build
+  #   uses: Abdullahi127/Reusable_Workflows/.github/workflows/deployDevEnvs.yml@main
 # jobs:
 #   build:
 #     runs-on: ubuntu-latest
