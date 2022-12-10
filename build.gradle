@@ -1,6 +1,6 @@
 VersionCatalog versionCatalog = project.extensions.getByType(VersionCatalogsExtension).named("libs")
 for(Project project : project.subprojects){
-    
+
     if(project.getName() == "core"){
         project.version = versionCatalog.findVersion("core").get().toString()
     } else if(project.getName() == "adp"){
@@ -14,4 +14,5 @@ for(Project project : project.subprojects){
     }else {
         throw new GradleException("Failed to set the version of the project: " + project.name)
     }
+
 }
