@@ -9,8 +9,6 @@ import org.gradle.api.tasks.options.Option;
 import java.io.File;
 import java.util.List;
 
-import java.io.File;
-
 public abstract class TaskUpdateProjectVersion extends DefaultTask {
 
     private File tomlFile = null;
@@ -54,8 +52,8 @@ public abstract class TaskUpdateProjectVersion extends DefaultTask {
 
         boolean isValidFile = VersionTaskHelper.isValidTomlFile(tomlFile);
         boolean isValidAlias = VersionTaskHelper.isValidAlias(alias, tomlFile);
-        boolean isValidVersion = VersionTaskHelper.isValidVersion(version, VersionTaskHelper.VALID_VERSIONS_WITHOUT_DEV);
-        VersionTaskHelper.isInvalidTomlProperties(!isValidFile, tomlFile.getName(), !isValidAlias, alias, !isValidVersion, version, VersionTaskHelper.VALID_VERSIONS_WITHOUT_DEV);
+        boolean isValidVersion = VersionTaskHelper.isValidVersion(version);
+        VersionTaskHelper.isInvalidTomlProperties(!isValidFile, tomlFile.getName(), !isValidAlias, alias, !isValidVersion, version);
 
         String[] versionAndType = version.split("-");
         String[] numbers = versionAndType[0].split("\\.");
@@ -70,9 +68,11 @@ public abstract class TaskUpdateProjectVersion extends DefaultTask {
         }
 
         String replaceWith = alias + " = " + "\"" + nextVersion + "\"";
-        List<String> validRegexVersions = VersionTaskHelper.createValidVersions(alias, VersionTaskHelper.VALID_VERSIONS);
+        List<String> validRegexVersions = VersionTaskHelper.createValidRegexNames(alias);
+
         boolean failed = VersionTaskHelper.replaceLinesMatching(tomlFile.getAbsolutePath(), replaceWith, validRegexVersions);
-        VersionTaskHelper.failedVersionReplacement(failed, alias);
+        VersionTaskHelper.failedVersionReplacement(alias, failed);
+
         setProjectVersion(nextVersion);
     }
 

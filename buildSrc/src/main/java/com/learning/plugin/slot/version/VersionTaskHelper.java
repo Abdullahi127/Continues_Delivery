@@ -1,5 +1,7 @@
 package com.learning.plugin.slot.version;
 
+import org.gradle.api.GradleException;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -16,43 +18,33 @@ public class VersionTaskHelper {
 
 	public static final String UNSPECIFIED = "unspecified";
 	public static final String VALID_TOML_FILE_NAME = "libs.versions.toml";
-	public static final String DEVELOPMENT_VERSION1 = "DEV";
-	public static final String DEVELOPMENT_VERSION2 = "PLACEHOLDER";
-	public static final String DIGESTS_VERSION1 = "\\d+\\.\\d+\\.\\d+";
-	public static final String DIGESTS_VERSION2 = "\\d+\\.\\d+";
-	public static final String DIGESTS_VERSION3 = "\\d+";
-	public static final String DIGESTS_WITH_SNAPSHOT = "\\d+\\.\\d+\\.\\d+-SNAPSHOT";
-	public static final String DIGESTS_WITH_RELEASE = "\\d+\\.\\d+\\.\\d+-RELEASE";
-	public static final String[] VALID_VERSIONS = new String[7];
-	public static final String[] VALID_VERSIONS_WITHOUT_DEV = new String[5];
+	public static final String REGULAR_EXPRESSION_DIGEST = "\\d+\\.\\d+\\.\\d+";
+	public static final String REGULAR_EXPRESSION_DIGEST_WITH_SNAPSHOT = "\\d+\\.\\d+\\.\\d+-SNAPSHOT";
+	public static final String REGULAR_EXPRESSION_DIGEST_WITH_RELEASE = "\\d+\\.\\d+\\.\\d+-RELEASE";
+	public static final String[] VALID_TOML_ALIAS_VALUES = new String[4];
+	public static final String[] VALID_GRADLE_VERSIONS = new String[3];
 
 	static {
-		VALID_VERSIONS[0] = DEVELOPMENT_VERSION1;
-		VALID_VERSIONS[1] = DEVELOPMENT_VERSION2;
-		VALID_VERSIONS[2] = DIGESTS_VERSION1;
-		VALID_VERSIONS[3] = DIGESTS_VERSION2;
-		VALID_VERSIONS[4] = DIGESTS_VERSION3;
-		VALID_VERSIONS[5] = DIGESTS_WITH_SNAPSHOT;
-		VALID_VERSIONS[6] = DIGESTS_WITH_RELEASE;
+		VALID_TOML_ALIAS_VALUES[0] = "PLACEHOLDER";
+		VALID_TOML_ALIAS_VALUES[1] = REGULAR_EXPRESSION_DIGEST;
+		VALID_TOML_ALIAS_VALUES[2] = REGULAR_EXPRESSION_DIGEST_WITH_SNAPSHOT;
+		VALID_TOML_ALIAS_VALUES[3] = REGULAR_EXPRESSION_DIGEST_WITH_RELEASE;
 
-		VALID_VERSIONS_WITHOUT_DEV[0] = DIGESTS_VERSION1;
-		VALID_VERSIONS_WITHOUT_DEV[1] = DIGESTS_VERSION2;
-		VALID_VERSIONS_WITHOUT_DEV[2] = DIGESTS_VERSION3;
-		VALID_VERSIONS_WITHOUT_DEV[3] = DIGESTS_WITH_SNAPSHOT;
-		VALID_VERSIONS_WITHOUT_DEV[4] = DIGESTS_WITH_RELEASE;
+		VALID_GRADLE_VERSIONS[0] = REGULAR_EXPRESSION_DIGEST;
+		VALID_GRADLE_VERSIONS[1] = REGULAR_EXPRESSION_DIGEST_WITH_SNAPSHOT;
+		VALID_GRADLE_VERSIONS[2] = REGULAR_EXPRESSION_DIGEST_WITH_RELEASE;
 	}
 
 	/**
-	 * Create and return valid regexes for the given {@code alias}.
+	 * Create and return an array list filled with valid TOML alias names.
 	 *
-	 * @param alias				the alias that will be used to create the regexes.
-	 * @param validVersions   	the valid version that will be used to create the regexes.
-	 * @return an array list filled with regexes for the given {@code alias}.
+	 * @param alias		the alias that will be used to create the regex names with.
+	 * @return an array list filled with valid TOML alias names.
 	 */
-	public static List<String> createValidVersions (String alias, String[] validVersions){
-		List<String> validRegexes = new ArrayList<>(validVersions.length);
-		for(String validVersion : validVersions){
-			String regex = alias + "=\"" + validVersion + "\"";
+	public static List<String> createValidRegexNames(String alias){
+		List<String> validRegexes = new ArrayList<>();
+		for(String value : VALID_TOML_ALIAS_VALUES){
+			String regex = alias + "=\"" + value + "\"";
 			validRegexes.add(regex);
 		}
 		return validRegexes;
@@ -109,17 +101,17 @@ public class VersionTaskHelper {
 	 * @param isInvalidVersion 	True - The given version is not a valid version.
 	 * @param version			the version that must be correct.
 	 */
-	public static void isInvalidTomlProperties(boolean isInvalidFile, String fileName, boolean isInvalidAlias, String alias, boolean isInvalidVersion, String version, String[] validVersions) {
+	public static void isInvalidTomlProperties(boolean isInvalidFile, String fileName, boolean isInvalidAlias, String alias, boolean isInvalidVersion, String version) {
 		if (isInvalidFile) {
-			throw new RuntimeException("Invalid file name [" + fileName + "].The file name must be ["+ VALID_TOML_FILE_NAME+"].");
+			throw new GradleException("Invalid file name [" + fileName + "].The file name must be ["+ VALID_TOML_FILE_NAME+"].");
 		}
 
 		if (isInvalidAlias) {
-			throw new RuntimeException("Invalid alias [" + alias + "].The alias could not be found in the toml file.");
+			throw new GradleException("Invalid alias [" + alias + "].The alias could not be found in the toml file.");
 		}
 
 		if (isInvalidVersion) {
-			throw new RuntimeException("Invalid version [" + version + "].The version must be one of this: " + Arrays.toString(validVersions) + ".");
+			throw new GradleException("Invalid version [" + version + "].The version must be one of this: " + Arrays.toString(VALID_GRADLE_VERSIONS) + ".");
 		}
 	}
 
@@ -150,12 +142,12 @@ public class VersionTaskHelper {
 	 * Check if the given {@code version} is valid.
 	 *
 	 * @param version the version that will be checked.
-	 * @return True - If the given {@code version} match with any of the {@code VALID_VERSION_NAMES}.
+	 * @return True - If the given {@code version} match with any of the {@code VALID_GRADLE_VERSIONS}.
 	 */
-	public static boolean isValidVersion(String version, String[] validVersions){
+	public static boolean isValidVersion(String version){
 		final boolean validateString = isValidString(version);
 		if(validateString){
-			for(String regex : validVersions){
+			for(String regex : VALID_GRADLE_VERSIONS){
 				if(version.matches(regex)){
 					return true;
 				}
@@ -168,7 +160,7 @@ public class VersionTaskHelper {
 	 * Check if the given {@code alias} is valid.
 	 *
 	 * @param alias	 the string that will be checked.
-	 * @param file	 the file where the given {@code alias} must exists in.
+	 * @param file	 the file where the given {@code alias} must exists in i.e. the TOML file.
 	 * @return True - If the given {@code alias} string is not null, empty, blank and exists in the given {@code file}.
 	 */
 	public static boolean isValidAlias(String alias, File file){
@@ -206,7 +198,7 @@ public class VersionTaskHelper {
 	 */
 	public static void isUnspecified(String str, String exceptionMessage){
 		if(isUnspecified(str)){
-			throw new RuntimeException(exceptionMessage);
+			throw new GradleException(exceptionMessage);
 		}
 	}
 
@@ -214,12 +206,12 @@ public class VersionTaskHelper {
 	/**
 	 * Throw runtime exception if the given {@code alias} version was not updated.
 	 *
-	 * @param failed	True - The version was not updated.
 	 * @param alias		the name of the version.
+	 * @param failed	True - The version was not updated.
 	 */
-	public static void failedVersionReplacement(boolean failed, String alias){
+	public static void failedVersionReplacement(String alias, boolean failed){
 		if(failed){
-			throw new RuntimeException("Failed to update the toml file. The format must be "+alias+" = \"Version\"");
+			throw new GradleException("Failed to update the toml file. Line contain: " + alias);
 		}
 	}
 }

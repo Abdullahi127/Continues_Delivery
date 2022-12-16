@@ -51,15 +51,15 @@ public abstract class TaskSetProjectVersion extends DefaultTask {
 
 		boolean isValidFile = VersionTaskHelper.isValidTomlFile(tomlFile);
 		boolean isValidAlias = VersionTaskHelper.isValidAlias(alias, tomlFile);
-		boolean isValidVersion = VersionTaskHelper.isValidVersion(version, VersionTaskHelper.VALID_VERSIONS);
+		boolean isValidVersion = VersionTaskHelper.isValidVersion(version);
 
-		VersionTaskHelper.isInvalidTomlProperties(!isValidFile, tomlFile.getName(), !isValidAlias, alias, !isValidVersion, version, VersionTaskHelper.VALID_VERSIONS);
+		VersionTaskHelper.isInvalidTomlProperties(!isValidFile, tomlFile.getName(), !isValidAlias, alias, !isValidVersion, version);
 
 		String replaceWith = alias + " = " + "\"" + version + "\"";
-		List<String> validVersions = VersionTaskHelper.createValidVersions(alias, VersionTaskHelper.VALID_VERSIONS);
+		List<String> validVersions = VersionTaskHelper.createValidRegexNames(alias);
 
 		boolean failed = VersionTaskHelper.replaceLinesMatching(getTomlFile().getAbsolutePath(), replaceWith, validVersions);
-		VersionTaskHelper.failedVersionReplacement(failed, alias);
+		VersionTaskHelper.failedVersionReplacement(alias, failed);
 
 	}
 }

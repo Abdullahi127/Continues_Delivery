@@ -7,6 +7,7 @@ import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
+import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.bundling.Zip;
 
@@ -53,26 +54,31 @@ public class SlotGameBasePlugin implements Plugin<Project> {
 		// Enable task from the additional plugins.
 		project.getExtensions().getByType(JAVA_PLUGIN_EXTENSION_CLASS).withSourcesJar(); // Enable sources Jar task.
 
+		// Get sourceSets for main.
+		SourceSet sourceSetMain = project.getExtensions().getByType(JAVA_PLUGIN_EXTENSION_CLASS).getSourceSets().named("main").get();
+
 		// Create the extensions. The blocks that will expose the properties to the build script.
 		DigestExtension digestExtension = project.getExtensions().create(DIGEST_EXTENSION_NAME, DIGEST_EXTENSION_CLASS);
 		VersionExtension versionExtension = project.getExtensions().create(EXTENSION_VERSION_NAME, VERSION_EXTENSION_CLASS);
 
 		// Out off box settings.
-		configureDigestExtension(project, digestExtension);
+		configureDigestExtension(project, digestExtension, sourceSetMain);
 		configureVersionExtension(project, versionExtension);
 	}
 
-	private void configureDigestExtension(Project project, DigestExtension extension) {
+	private void configureDigestExtension(Project project, DigestExtension extension, SourceSet sourceSetMain) {
 		project.afterEvaluate(exe -> {
 
 			// Set the source directory.
 			extension.getSourceDirectory().convention(
-					project.getLayout().getProjectDirectory().files(PROJECT_SOURCE_FOLDER)
+					sourceSetMain.getAllJava()
+					//project.getLayout().getProjectDirectory().files(PROJECT_SOURCE_FOLDER)
 			);
 
 			// Set the build classes directory.
 			extension.getClassesDirectory().convention(
-					project.getLayout().getBuildDirectory().files(BUILD_CLASSES_FOLDER)
+					sourceSetMain.getOutput()
+					//project.getLayout().getBuildDirectory().files(BUILD_CLASSES_FOLDER)
 			);
 
 			// Set the output of the JAR task as input.

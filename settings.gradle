@@ -1,2 +1,2 @@
-rootProject.name="App"
+rootProject.name = "App"
 include("core", "adp", "dp", "oc", "sim")
